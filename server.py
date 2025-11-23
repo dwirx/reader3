@@ -2,19 +2,32 @@ import os
 import pickle
 from functools import lru_cache
 from typing import Optional
+import urllib.parse
+import urllib.request
+import json
 
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from reader3 import Book, BookMetadata, ChapterContent, TOCEntry
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Where are the book folders located?
 BOOKS_DIR = "."
+
+# Pydantic model for translation request
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: str = "id"  # default to Indonesian
+    source_lang: str = "auto"  # auto-detect
 
 @lru_cache(maxsize=10)
 def load_book_cached(folder_name: str) -> Optional[Book]:
@@ -119,6 +132,44 @@ async def serve_image(book_id: str, image_name: str):
         raise HTTPException(status_code=404, detail="Image not found")
 
     return FileResponse(img_path)
+
+@app.post("/api/translate")
+async def translate_text(req: TranslateRequest):
+    """
+    Translate text using Google Translate API.
+    Returns JSON with translated text and detected source language.
+    """
+    try:
+        # Encode text for URL
+        text_encoded = urllib.parse.quote(req.text)
+        
+        # Build Google Translate API URL
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={req.source_lang}&tl={req.target_lang}&dt=t&q={text_encoded}"
+        
+        # Make request
+        with urllib.request.urlopen(url, timeout=10) as response:
+            result = json.loads(response.read().decode('utf-8'))
+        
+        # Parse response
+        # Result format: [[[translated, original, ...]], null, source_lang, ...]
+        if result and len(result) > 0 and result[0]:
+            # Combine all translated segments
+            translated_text = "".join([segment[0] for segment in result[0] if segment[0]])
+            source_lang = result[2] if len(result) > 2 else "unknown"
+            
+            return JSONResponse({
+                "success": True,
+                "translated": translated_text,
+                "source_lang": source_lang,
+                "target_lang": req.target_lang
+            })
+        else:
+            raise HTTPException(status_code=500, detail="Translation failed: Invalid response format")
+            
+    except urllib.error.URLError as e:
+        raise HTTPException(status_code=503, detail=f"Translation service unavailable: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
