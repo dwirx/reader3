@@ -387,5 +387,26 @@ async def translate_with_google(req: TranslateRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting server at http://127.0.0.1:8123")
-    uvicorn.run(app, host="127.0.0.1", port=8123)
+    import socket
+    
+    # Get local IP address
+    hostname = socket.gethostname()
+    try:
+        local_ip = socket.gethostbyname(hostname)
+    except:
+        local_ip = "your-local-ip"
+    
+    print("\n" + "="*60)
+    print("📚 Reader3 Server Starting...")
+    print("="*60)
+    print(f"\n✅ Local Access:")
+    print(f"   http://127.0.0.1:8123")
+    print(f"   http://localhost:8123")
+    print(f"\n🌐 Network Access (from other devices):")
+    print(f"   http://{local_ip}:8123")
+    print(f"\n📱 Access from phone/tablet on same WiFi:")
+    print(f"   1. Connect to same WiFi network")
+    print(f"   2. Open browser and go to: http://{local_ip}:8123")
+    print("\n" + "="*60 + "\n")
+    
+    uvicorn.run(app, host="0.0.0.0", port=8123)
