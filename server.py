@@ -1,19 +1,22 @@
 import os
 import pickle
+import shutil
+import tempfile
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, List
 import urllib.parse
 import urllib.request
 import json
 from dotenv import load_dotenv
+from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from reader3 import Book, BookMetadata, ChapterContent, TOCEntry
+from reader3 import Book, BookMetadata, ChapterContent, TOCEntry, process_epub, save_to_pickle
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,7 +28,12 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Where are the book folders located?
-BOOKS_DIR = "."
+BOOKS_DIR = "My-Library"
+UPLOAD_DIR = "My-Library"
+
+# Ensure directories exist
+os.makedirs(BOOKS_DIR, exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Pydantic model for translation request
 class TranslateRequest(BaseModel):
@@ -34,13 +42,18 @@ class TranslateRequest(BaseModel):
     source_lang: str = "auto"  # auto-detect
     provider: str = "zai"  # default to Z.ai ("zai" or "google")
 
-@lru_cache(maxsize=10)
+@lru_cache(maxsize=20)
 def load_book_cached(folder_name: str) -> Optional[Book]:
     """
     Loads the book from the pickle file.
     Cached so we don't re-read the disk on every click.
     """
-    file_path = os.path.join(BOOKS_DIR, folder_name, "book.pkl")
+    # Handle both absolute and relative paths
+    if folder_name.startswith(BOOKS_DIR):
+        file_path = os.path.join(folder_name, "book.pkl")
+    else:
+        file_path = os.path.join(BOOKS_DIR, folder_name, "book.pkl")
+    
     if not os.path.exists(file_path):
         return None
 
@@ -53,25 +66,60 @@ def load_book_cached(folder_name: str) -> Optional[Book]:
         return None
 
 @app.get("/", response_class=HTMLResponse)
-async def library_view(request: Request):
+async def library_view(request: Request, search: Optional[str] = None):
     """Lists all available processed books."""
     books = []
 
     # Scan directory for folders ending in '_data' that have a book.pkl
     if os.path.exists(BOOKS_DIR):
         for item in os.listdir(BOOKS_DIR):
-            if item.endswith("_data") and os.path.isdir(item):
+            item_path = os.path.join(BOOKS_DIR, item)
+            if item.endswith("_data") and os.path.isdir(item_path):
                 # Try to load it to get the title
                 book = load_book_cached(item)
                 if book:
-                    books.append({
+                    # Check for cover image
+                    cover_path = None
+                    cover_url = None
+                    images_dir = os.path.join(item_path, "images")
+                    if os.path.exists(images_dir):
+                        # Look for cover image (common names)
+                        for cover_name in os.listdir(images_dir):
+                            if 'cover' in cover_name.lower():
+                                cover_path = os.path.join(images_dir, cover_name)
+                                cover_url = f"/library/{item}/cover/{cover_name}"
+                                break
+                        # If no cover found, use first image
+                        if not cover_url and os.listdir(images_dir):
+                            first_image = sorted(os.listdir(images_dir))[0]
+                            cover_url = f"/library/{item}/cover/{first_image}"
+                    
+                    book_data = {
                         "id": item,
                         "title": book.metadata.title,
-                        "author": ", ".join(book.metadata.authors),
-                        "chapters": len(book.spine)
-                    })
+                        "author": ", ".join(book.metadata.authors) if book.metadata.authors else "Unknown",
+                        "chapters": len(book.spine),
+                        "cover": cover_url,
+                        "description": book.metadata.description or ""
+                    }
+                    
+                    # Apply search filter if provided
+                    if search:
+                        search_lower = search.lower()
+                        if (search_lower in book_data["title"].lower() or 
+                            search_lower in book_data["author"].lower()):
+                            books.append(book_data)
+                    else:
+                        books.append(book_data)
+    
+    # Sort books by title
+    books.sort(key=lambda x: x["title"].lower())
 
-    return templates.TemplateResponse("library.html", {"request": request, "books": books})
+    return templates.TemplateResponse("library.html", {
+        "request": request, 
+        "books": books,
+        "search_query": search or ""
+    })
 
 @app.get("/read/{book_id}", response_class=HTMLResponse)
 async def redirect_to_first_chapter(request: Request, book_id: str):
@@ -137,6 +185,86 @@ async def serve_image(book_id: str, image_name: str):
         raise HTTPException(status_code=404, detail="Image not found")
 
     return FileResponse(img_path)
+
+@app.get("/library/{book_id}/cover/{image_name}")
+async def serve_cover(book_id: str, image_name: str):
+    """Serve book cover images for library view."""
+    safe_book_id = os.path.basename(book_id)
+    safe_image_name = os.path.basename(image_name)
+    
+    img_path = os.path.join(BOOKS_DIR, safe_book_id, "images", safe_image_name)
+    
+    if not os.path.exists(img_path):
+        raise HTTPException(status_code=404, detail="Cover not found")
+    
+    return FileResponse(img_path)
+
+@app.post("/upload")
+async def upload_epub(file: UploadFile = File(...)):
+    """Upload and automatically process an EPUB file."""
+    try:
+        # Validate file extension
+        if not file.filename.endswith('.epub'):
+            raise HTTPException(status_code=400, detail="Only EPUB files are allowed")
+        
+        # Create temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as temp_file:
+            # Save uploaded file
+            content = await file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+        
+        try:
+            # Generate output directory name
+            book_name = os.path.splitext(file.filename)[0]
+            # Clean the name for directory
+            safe_name = "".join(c for c in book_name if c.isalnum() or c in (' ', '-', '_')).strip()
+            safe_name = safe_name.replace(' ', '_')
+            out_dir = os.path.join(UPLOAD_DIR, f"{safe_name}_data")
+            
+            # Process the EPUB
+            book_obj = process_epub(temp_file_path, out_dir)
+            save_to_pickle(book_obj, out_dir)
+            
+            # Clear cache so new book appears
+            load_book_cached.cache_clear()
+            
+            return JSONResponse({
+                "success": True,
+                "message": f"Book '{book_obj.metadata.title}' uploaded and processed successfully!",
+                "book_id": os.path.basename(out_dir),
+                "title": book_obj.metadata.title,
+                "chapters": len(book_obj.spine)
+            })
+            
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing EPUB: {str(e)}")
+
+@app.delete("/library/{book_id}")
+async def delete_book(book_id: str):
+    """Delete a book from library."""
+    try:
+        safe_book_id = os.path.basename(book_id)
+        book_path = os.path.join(BOOKS_DIR, safe_book_id)
+        
+        if not os.path.exists(book_path):
+            raise HTTPException(status_code=404, detail="Book not found")
+        
+        # Delete the directory
+        shutil.rmtree(book_path)
+        
+        # Clear cache
+        load_book_cached.cache_clear()
+        
+        return JSONResponse({"success": True, "message": "Book deleted successfully"})
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting book: {str(e)}")
 
 @app.post("/api/translate")
 async def translate_text(req: TranslateRequest):
