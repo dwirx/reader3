@@ -40,12 +40,14 @@
 
 - `Ctrl+Shift+T` - Translate selected text
 - `Alt+Z` - Undo last translation
+- `Ctrl+H` - Toggle toolbar visibility (hide/show)
 
 ### 🎨 Visual Indicators
 
-- **Kuning dengan garis putus-putus** = Teks sudah diterjemahkan
-- **Biru dengan garis putus-putus** = Teks original (setelah toggle)
-- **Hover** = Tampilkan tooltip "🔄 Click to toggle"
+- **Biru gradient (sky blue)** = Teks sudah diterjemahkan
+- **Kuning gradient** = Teks original (setelah toggle)
+- **Hover** = Tampilkan tooltip "🔄 Click to toggle" + subtle lift effect
+- **🌐 Button** = Floating button untuk show/hide toolbar
 
 ### 🚀 Menjalankan Server
 
@@ -99,11 +101,22 @@ Response:
 
 ### 💡 Tips Penggunaan
 
+#### Desktop:
 1. **Translate Paragraf Panjang**: Pilih seluruh paragraf → Translate
 2. **Translate Satu Kata**: Pilih kata → Translate
 3. **Bandingkan Terjemahan**: Klik pada teks yang diterjemahkan untuk toggle bolak-balik
 4. **Translate Cepat**: Gunakan `Ctrl+Shift+T` setelah memilih teks
 5. **Translate Halaman**: Untuk membaca full chapter dalam bahasa lain
+6. **Hide Toolbar**: Klik tombol ✕ atau tekan `Ctrl+H` untuk fokus membaca
+7. **Show Toolbar**: Klik tombol 🌐 floating atau tekan `Ctrl+H` lagi
+
+#### Mobile:
+1. **Toggle Sidebar**: Tap tombol ☰ di kanan atas untuk hide/show TOC
+2. **Toolbar di Bottom**: Toolbar translate ada di bawah, mudah dijangkau
+3. **Select Text**: Long press pada text untuk select, lalu tap "Select Text" button
+4. **Quick Translate**: Tap "📄 Page" untuk translate seluruh halaman
+5. **Floating Button**: Tombol 🌐 di kanan bawah untuk show/hide toolbar
+6. **Portrait & Landscape**: Support kedua orientasi
 
 ### 🎯 Cara Kerja Toggle
 
@@ -124,6 +137,22 @@ https://translate.googleapis.com/translate_a/single
 **Note**: Free API dengan rate limiting. Untuk production, gunakan official Google Translate API.
 
 ### 📝 Changelog
+
+**v3.3** (23 Nov 2025)
+- ✅ **Full Mobile Responsive** - Perfect untuk smartphone & tablet
+- ✅ Mobile toolbar di bottom (mudah dijangkau)
+- ✅ Collapsible sidebar untuk mobile
+- ✅ Touch-friendly buttons (min 44px)
+- ✅ Premium library design dengan gradient
+- ✅ Adaptive layout untuk semua screen sizes
+
+**v3.2** (23 Nov 2025)
+- ✅ Hide/Show toolbar dengan floating button 🌐
+- ✅ Warna highlight premium (sky blue gradient)
+- ✅ Smooth animations & transitions
+- ✅ Persistent state (localStorage)
+- ✅ Better hover effects
+- ✅ Ctrl+H shortcut untuk toggle toolbar
 
 **v3.1** (23 Nov 2025)
 - ✅ Refactor ke struktur modular (CSS & JS terpisah)

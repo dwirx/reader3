@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>{{ book.metadata.title }}</title>
     <link rel="stylesheet" href="/static/reader.css">
 </head>
@@ -10,6 +12,7 @@
 
     <!-- SIDEBAR -->
     <div id="sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
         <a href="/" class="nav-home">← Back to Library</a>
         <div class="nav-header">{{ book.metadata.title }}</div>
 
@@ -61,31 +64,39 @@
         </div>
     </div>
 
+    <!-- Toolbar Toggle Button -->
+    <button class="toolbar-toggle toolbar-visible" onclick="toggleToolbar()" title="Hide/Show Toolbar (Ctrl+H)" aria-label="Toggle toolbar">
+        ✕
+    </button>
+
     <!-- Translation Toolbar -->
     <div class="translate-toolbar">
-        <span style="color: #6b7280; font-weight: 500;">🌐 Translate:</span>
-        <select class="lang-select" id="targetLang" title="Target Language">
-            <option value="id">🇮🇩 Indonesia</option>
-            <option value="en">🇬🇧 English</option>
-            <option value="zh-CN">🇨🇳 Chinese</option>
-            <option value="ja">🇯🇵 Japanese</option>
-            <option value="ko">🇰🇷 Korean</option>
-            <option value="ar">🇸🇦 Arabic</option>
-            <option value="es">🇪🇸 Spanish</option>
-            <option value="fr">🇫🇷 French</option>
-            <option value="de">🇩🇪 German</option>
-            <option value="ru">🇷🇺 Russian</option>
-            <option value="pt">🇵🇹 Portuguese</option>
-            <option value="it">🇮🇹 Italian</option>
-            <option value="th">🇹🇭 Thai</option>
-            <option value="vi">🇻🇳 Vietnamese</option>
-        </select>
-        <button class="translate-btn" id="translateBtn" onclick="translateSelection()" disabled title="Select text first, then click to translate">
-            Select Text First
-        </button>
-        <button class="translate-page-btn" id="translatePageBtn" onclick="translateFullPage()" title="Translate all text on this page">
-            📄 Translate Page
-        </button>
+        <div class="toolbar-row">
+            <select class="lang-select" id="targetLang" title="Target Language">
+                <option value="id">🇮🇩 ID</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="zh-CN">🇨🇳 CN</option>
+                <option value="ja">🇯🇵 JA</option>
+                <option value="ko">🇰🇷 KO</option>
+                <option value="ar">🇸🇦 AR</option>
+                <option value="es">🇪🇸 ES</option>
+                <option value="fr">🇫🇷 FR</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="ru">🇷🇺 RU</option>
+                <option value="pt">🇵🇹 PT</option>
+                <option value="it">🇮🇹 IT</option>
+                <option value="th">🇹🇭 TH</option>
+                <option value="vi">🇻🇳 VI</option>
+            </select>
+            <button class="translate-btn" id="translateBtn" onclick="translateSelection()" disabled title="Translate selected text">
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">Text</span>
+            </button>
+            <button class="translate-page-btn" id="translatePageBtn" onclick="translateFullPage()" title="Translate entire page">
+                <span class="btn-icon">📄</span>
+                <span class="btn-text">Page</span>
+            </button>
+        </div>
     </div>
 
     <script>

@@ -11,6 +11,8 @@ let lastSelection = {
 document.addEventListener('DOMContentLoaded', function() {
     initTranslation();
     initKeyboardShortcuts();
+    initToolbarToggle();
+    initMobileFeatures();
 });
 
 /* ===== TOC Navigation ===== */
@@ -46,11 +48,10 @@ function handleSelectionChange() {
         lastSelection.container = selection.getRangeAt(0).commonAncestorContainer;
         
         btn.disabled = false;
-        const preview = text.length > 30 ? text.substring(0, 30) + '...' : text;
-        btn.innerHTML = `🌐 Translate`;
+        btn.innerHTML = '<span class="btn-icon">✨</span><span class="btn-text">Text</span>';
     } else {
         btn.disabled = true;
-        btn.innerHTML = 'Select Text First';
+        btn.innerHTML = '<span class="btn-icon">✨</span><span class="btn-text">Text</span>';
     }
 }
 
@@ -64,9 +65,8 @@ async function translateSelection() {
     const btn = document.getElementById('translateBtn');
     
     // Save original button state
-    const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="translate-loading"></span> Translating...';
+    btn.innerHTML = '<span class="translate-loading"></span><span class="btn-text">Wait...</span>';
     
     showStatus('Translating...', 'loading');
 
@@ -102,7 +102,7 @@ async function translateSelection() {
     } finally {
         // Restore button
         btn.disabled = false;
-        btn.innerHTML = 'Select Text First';
+        btn.innerHTML = '<span class="btn-icon">✨</span><span class="btn-text">Text</span>';
         
         // Clear selection
         window.getSelection().removeAllRanges();
@@ -153,14 +153,10 @@ function toggleTranslation(element) {
         // Switch to original
         element.textContent = original;
         element.setAttribute('data-state', 'original');
-        element.style.background = 'linear-gradient(120deg, #dbeafe 0%, #bfdbfe 100%)';
-        element.style.borderBottomColor = '#3b82f6';
     } else {
         // Switch to translated
         element.textContent = translated;
         element.setAttribute('data-state', 'translated');
-        element.style.background = '';
-        element.style.borderBottomColor = '';
     }
 }
 
@@ -198,6 +194,12 @@ function initKeyboardShortcuts() {
         if (e.altKey && e.key === 'z') {
             e.preventDefault();
             undoLastTranslation();
+        }
+        
+        // Ctrl+H to toggle toolbar
+        if (e.ctrlKey && e.key === 'h') {
+            e.preventDefault();
+            toggleToolbar();
         }
     });
 }
@@ -255,7 +257,7 @@ async function translateFullPage() {
     
     const pageBtn = document.getElementById('translatePageBtn');
     pageBtn.disabled = true;
-    pageBtn.innerHTML = '<span class="translate-loading"></span> Translating Page...';
+    pageBtn.innerHTML = '<span class="translate-loading"></span><span class="btn-text">Wait...</span>';
     
     showStatus(`Translating ${toTranslate.length} elements...`, 'loading');
     
@@ -321,7 +323,7 @@ async function translateFullPage() {
     
     // Restore button
     pageBtn.disabled = false;
-    pageBtn.innerHTML = '📄 Translate Page';
+    pageBtn.innerHTML = '<span class="btn-icon">📄</span><span class="btn-text">Page</span>';
     
     showStatus(`✓ Page translated! Success: ${successCount}, Failed: ${failCount}`, 'success');
 }
@@ -330,8 +332,84 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/* ===== Toolbar Toggle ===== */
+
+function initToolbarToggle() {
+    // Load saved state from localStorage
+    const isHidden = localStorage.getItem('toolbarHidden') === 'true';
+    if (isHidden) {
+        document.querySelector('.translate-toolbar').classList.add('hidden');
+        document.querySelector('.toolbar-toggle').classList.remove('toolbar-visible');
+    } else {
+        document.querySelector('.toolbar-toggle').classList.add('toolbar-visible');
+    }
+}
+
+function toggleToolbar() {
+    const toolbar = document.querySelector('.translate-toolbar');
+    const toggleBtn = document.querySelector('.toolbar-toggle');
+    
+    if (toolbar.classList.contains('hidden')) {
+        // Show toolbar
+        toolbar.classList.remove('hidden');
+        toggleBtn.classList.add('toolbar-visible');
+        toggleBtn.innerHTML = '✕';
+        localStorage.setItem('toolbarHidden', 'false');
+        showStatus('Toolbar shown', 'success');
+    } else {
+        // Hide toolbar
+        toolbar.classList.add('hidden');
+        toggleBtn.classList.remove('toolbar-visible');
+        toggleBtn.innerHTML = '🌐';
+        localStorage.setItem('toolbarHidden', 'true');
+        showStatus('Toolbar hidden (Press Ctrl+H or click 🌐)', 'success');
+    }
+}
+
+/* ===== Mobile Features ===== */
+
+function initMobileFeatures() {
+    // Auto-collapse sidebar on mobile on load
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebar');
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+        }
+    }
+    
+    // Update on window resize
+    window.addEventListener('resize', function() {
+        updateMobileLayout();
+    });
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    
+    const button = document.querySelector('.sidebar-toggle');
+    button.innerHTML = isCollapsed ? '☰' : '✕';
+}
+
+function updateMobileLayout() {
+    const isMobile = window.innerWidth <= 768;
+    const toolbar = document.querySelector('.translate-toolbar');
+    const toggleBtn = document.querySelector('.toolbar-toggle');
+    
+    if (isMobile) {
+        // Adjust for mobile
+        if (!toolbar.classList.contains('hidden')) {
+            toggleBtn.classList.add('toolbar-visible');
+        }
+    }
+}
+
 // Export functions for inline onclick handlers
 window.findAndGo = findAndGo;
 window.translateSelection = translateSelection;
 window.translateFullPage = translateFullPage;
+window.toggleToolbar = toggleToolbar;
+window.toggleSidebar = toggleSidebar;
 
