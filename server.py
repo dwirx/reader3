@@ -56,19 +56,35 @@ async def library_view(request: Request):
     return templates.TemplateResponse("library.html", {"request": request, "books": books})
 
 @app.get("/read/{book_id}", response_class=HTMLResponse)
-async def redirect_to_first_chapter(book_id: str):
+async def redirect_to_first_chapter(request: Request, book_id: str):
     """Helper to just go to chapter 0."""
-    return await read_chapter(book_id=book_id, chapter_index=0)
+    return await read_chapter(request=request, book_id=book_id, chapter_identifier="0")
 
-@app.get("/read/{book_id}/{chapter_index}", response_class=HTMLResponse)
-async def read_chapter(request: Request, book_id: str, chapter_index: int):
-    """The main reader interface."""
+@app.get("/read/{book_id}/{chapter_identifier}", response_class=HTMLResponse)
+async def read_chapter(request: Request, book_id: str, chapter_identifier: str):
+    """The main reader interface. Accepts either integer index or filename."""
     book = load_book_cached(book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    if chapter_index < 0 or chapter_index >= len(book.spine):
-        raise HTTPException(status_code=404, detail="Chapter not found")
+    # Try to parse as integer first (for index-based navigation)
+    chapter_index = None
+    try:
+        chapter_index = int(chapter_identifier)
+        if chapter_index < 0 or chapter_index >= len(book.spine):
+            raise HTTPException(status_code=404, detail="Chapter index out of range")
+    except ValueError:
+        # Not an integer, treat as filename
+        # Search for the chapter by href (filename)
+        for idx, chapter in enumerate(book.spine):
+            # Match the filename, handling various formats
+            # The href might be "text/chapter1.html" but chapter_identifier might be full or partial
+            if chapter.href == chapter_identifier or chapter.href.endswith(chapter_identifier):
+                chapter_index = idx
+                break
+        
+        if chapter_index is None:
+            raise HTTPException(status_code=404, detail=f"Chapter with filename '{chapter_identifier}' not found")
 
     current_chapter = book.spine[chapter_index]
 
