@@ -5,6 +5,7 @@ Parses an EPUB file into a structured object that can be used to serve the book 
 import os
 import pickle
 import shutil
+import re
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any
 from datetime import datetime
@@ -292,15 +293,64 @@ def save_to_pickle(book: Book, output_dir: str):
 
 # --- CLI ---
 
+def convert_windows_path_to_wsl(path: str) -> str:
+    r"""
+    Convert Windows path to WSL path.
+    Examples:
+        F:\2026\Downloads\book.epub -> /mnt/f/2026/Downloads/book.epub
+        C:\Users\user\book.epub -> /mnt/c/Users/user/book.epub
+    """
+    # Check if it's a Windows path (has drive letter and backslashes)
+    windows_path_pattern = r'^([A-Za-z]):\\(.*)$'
+    match = re.match(windows_path_pattern, path)
+    
+    if match:
+        drive_letter = match.group(1).lower()
+        rest_of_path = match.group(2)
+        # Convert backslashes to forward slashes
+        rest_of_path = rest_of_path.replace('\\', '/')
+        # Build WSL path
+        wsl_path = f"/mnt/{drive_letter}/{rest_of_path}"
+        return wsl_path
+    
+    # If it's already a Unix path or relative path, return as is
+    return path
+
+
 if __name__ == "__main__":
 
     import sys
     if len(sys.argv) < 2:
         print("Usage: python reader3.py <file.epub>")
+        print("\nExamples:")
+        print("  python reader3.py book.epub")
+        print("  python reader3.py /path/to/book.epub")
+        print("  python reader3.py 'F:\\Downloads\\book.epub'  (Windows path will be auto-converted)")
         sys.exit(1)
 
     epub_file = sys.argv[1]
-    assert os.path.exists(epub_file), "File not found."
+    
+    # Convert Windows path to WSL path if needed
+    original_path = epub_file
+    epub_file = convert_windows_path_to_wsl(epub_file)
+    
+    if original_path != epub_file:
+        print(f"🔄 Converted Windows path to WSL path:")
+        print(f"   From: {original_path}")
+        print(f"   To:   {epub_file}")
+        print()
+    
+    if not os.path.exists(epub_file):
+        print(f"❌ Error: File not found!")
+        print(f"   Path: {epub_file}")
+        print()
+        print("💡 Tips:")
+        print("   - Make sure the file path is correct")
+        print("   - For Windows paths in WSL, use quotes: 'F:\\path\\to\\file.epub'")
+        print("   - Or use WSL path format: /mnt/f/path/to/file.epub")
+        print("   - Check if the file exists: ls -la \"$(dirname /mnt/f/2026/Downloads/)\"")
+        sys.exit(1)
+    
     out_dir = os.path.splitext(epub_file)[0] + "_data"
 
     book_obj = process_epub(epub_file, out_dir)

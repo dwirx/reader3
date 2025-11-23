@@ -8,7 +8,25 @@ This project was 90% vibe coded just to illustrate how one can very easily [read
 
 ## Usage
 
-The project uses [uv](https://docs.astral.sh/uv/). So for example, download [Dracula EPUB3](https://www.gutenberg.org/ebooks/345) to this directory as `dracula.epub`, then:
+The project uses [uv](https://docs.astral.sh/uv/). 
+
+### 🪟 Windows Path Support (NEW!)
+
+Script sekarang **otomatis mengkonversi** Windows path ke WSL path!
+
+```bash
+# Windows path (gunakan single quotes)
+uv run reader3.py 'F:\Downloads\book.epub'
+
+# WSL path (langsung)
+uv run reader3.py /mnt/f/Downloads/book.epub
+```
+
+📖 Lihat [WSL_PATH_GUIDE.md](WSL_PATH_GUIDE.md) untuk detail lengkap.
+
+### Basic Usage
+
+Download [Dracula EPUB3](https://www.gutenberg.org/ebooks/345) to this directory as `dracula.epub`, then:
 
 ```bash
 uv run reader3.py dracula.epub
