@@ -104,6 +104,7 @@ a.toc-link.active {
     max-width: 700px; 
     margin: 0 auto; 
     padding: 60px 40px; 
+    padding-top: 80px;
     line-height: 1.8; 
     font-size: 1.15em; 
     color: #212529;
@@ -174,23 +175,25 @@ a.toc-link.active {
 /* Translation Toolbar */
 .translate-toolbar { 
     position: fixed; 
-    top: 20px; 
-    right: 20px; 
+    top: 15px; 
+    right: 15px; 
     display: flex; 
     gap: 10px; 
     align-items: stretch; 
-    background: white; 
-    padding: 12px 14px; 
-    border-radius: 10px; 
-    box-shadow: 0 2px 16px rgba(0,0,0,0.12); 
-    z-index: 1000; 
+    background: rgba(255, 255, 255, 0.98); 
+    padding: 10px 12px; 
+    border-radius: 12px; 
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1); 
+    z-index: 900; 
     font-family: -apple-system, sans-serif; 
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    max-width: calc(100vw - 340px);
 }
 
 .toolbar-row {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
 }
 
@@ -201,21 +204,21 @@ a.toc-link.active {
 /* Toggle button for toolbar */
 .toolbar-toggle {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 15px;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 22px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    z-index: 1001;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    z-index: 950;
     transition: all 0.3s ease;
     line-height: 1;
 }
@@ -231,8 +234,7 @@ a.toc-link.active {
 }
 
 .toolbar-toggle.toolbar-visible {
-    right: auto;
-    left: calc(100% - 68px - 320px);
+    opacity: 0.7;
 }
 
 .toolbar-toggle.toolbar-visible:hover {
@@ -243,18 +245,18 @@ a.toc-link.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white; 
     border: none; 
-    padding: 10px 14px; 
+    padding: 8px 12px; 
     border-radius: 8px; 
     cursor: pointer; 
     font-weight: 600; 
     transition: all 0.3s ease; 
-    flex: 1;
+    flex: 0.8;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .translate-btn:hover:not(:disabled) { 
@@ -278,18 +280,18 @@ a.toc-link.active {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
     border: none;
-    padding: 10px 14px;
+    padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.3s ease;
-    flex: 1;
+    flex: 0.8;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .translate-page-btn:hover:not(:disabled) {
@@ -302,15 +304,34 @@ a.toc-link.active {
     transform: translateY(0);
 }
 
-.lang-select { 
-    padding: 10px 12px; 
+.provider-select {
+    padding: 8px 10px; 
     border: 2px solid #e5e7eb; 
     border-radius: 8px; 
     background: white; 
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    flex: 1;
+    flex: 0.7;
+    transition: all 0.2s;
+    margin-right: 6px;
+}
+
+.provider-select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.lang-select { 
+    padding: 8px 10px; 
+    border: 2px solid #e5e7eb; 
+    border-radius: 8px; 
+    background: white; 
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    flex: 0.9;
     transition: all 0.2s;
 }
 
@@ -321,23 +342,24 @@ a.toc-link.active {
 }
 
 .btn-icon {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1;
 }
 
 .btn-text {
-    font-size: 13px;
-    letter-spacing: 0.3px;
+    font-size: 12px;
+    letter-spacing: 0.2px;
 }
 
 /* Translation Status */
 .translation-status {
     position: fixed;
-    top: 80px;
-    right: 20px;
-    background: white;
+    top: 75px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
     padding: 12px 18px;
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     z-index: 1001;
     font-family: -apple-system, sans-serif;
@@ -534,6 +556,14 @@ a.toc-link.active {
         gap: 8px;
         width: 100%;
         align-items: stretch;
+    }
+    
+    .provider-select {
+        flex: 0.7;
+        padding: 12px 10px;
+        font-size: 13px;
+        min-width: 0;
+        margin-right: 0;
     }
     
     .lang-select {

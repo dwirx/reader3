@@ -62,13 +62,15 @@ async function translateSelection() {
     }
 
     const targetLang = document.getElementById('targetLang').value;
+    const provider = document.getElementById('providerSelect').value;
     const btn = document.getElementById('translateBtn');
     
     // Save original button state
     btn.disabled = true;
     btn.innerHTML = '<span class="translate-loading"></span><span class="btn-text">Wait...</span>';
     
-    showStatus('Translating...', 'loading');
+    const providerName = provider === 'zai' ? 'Z.ai' : 'Google';
+    showStatus(`Translating with ${providerName}...`, 'loading');
 
     try {
         const response = await fetch('/api/translate', {
@@ -79,7 +81,8 @@ async function translateSelection() {
             body: JSON.stringify({
                 text: lastSelection.text,
                 target_lang: targetLang,
-                source_lang: 'auto'
+                source_lang: 'auto',
+                provider: provider
             })
         });
 
@@ -92,7 +95,8 @@ async function translateSelection() {
         if (data.success) {
             // Replace the selected text with translation
             replaceSelectedText(data.translated);
-            showStatus(`✓ Translated from ${data.source_lang} to ${data.target_lang}`, 'success');
+            const providerEmoji = data.provider === 'zai' ? '🤖' : '🌐';
+            showStatus(`✓ ${providerEmoji} Translated from ${data.source_lang} to ${data.target_lang}`, 'success');
         } else {
             throw new Error('Translation failed');
         }
@@ -229,6 +233,7 @@ function escapeHtml(text) {
 
 async function translateFullPage() {
     const targetLang = document.getElementById('targetLang').value;
+    const provider = document.getElementById('providerSelect').value;
     const content = document.querySelector('.book-content');
     
     if (!content) {
@@ -259,7 +264,8 @@ async function translateFullPage() {
     pageBtn.disabled = true;
     pageBtn.innerHTML = '<span class="translate-loading"></span><span class="btn-text">Wait...</span>';
     
-    showStatus(`Translating ${toTranslate.length} elements...`, 'loading');
+    const providerName = provider === 'zai' ? 'Z.ai' : 'Google';
+    showStatus(`Translating ${toTranslate.length} elements with ${providerName}...`, 'loading');
     
     let successCount = 0;
     let failCount = 0;
@@ -281,7 +287,8 @@ async function translateFullPage() {
                 body: JSON.stringify({
                     text: originalText,
                     target_lang: targetLang,
-                    source_lang: 'auto'
+                    source_lang: 'auto',
+                    provider: provider
                 })
             });
             
@@ -325,7 +332,8 @@ async function translateFullPage() {
     pageBtn.disabled = false;
     pageBtn.innerHTML = '<span class="btn-icon">📄</span><span class="btn-text">Page</span>';
     
-    showStatus(`✓ Page translated! Success: ${successCount}, Failed: ${failCount}`, 'success');
+    const providerEmoji = provider === 'zai' ? '🤖' : '🌐';
+    showStatus(`✓ ${providerEmoji} Page translated! Success: ${successCount}, Failed: ${failCount}`, 'success');
 }
 
 function sleep(ms) {

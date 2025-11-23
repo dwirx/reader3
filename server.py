@@ -5,6 +5,7 @@ from typing import Optional
 import urllib.parse
 import urllib.request
 import json
+from dotenv import load_dotenv
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
@@ -13,6 +14,9 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from reader3 import Book, BookMetadata, ChapterContent, TOCEntry
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -28,6 +32,7 @@ class TranslateRequest(BaseModel):
     text: str
     target_lang: str = "id"  # default to Indonesian
     source_lang: str = "auto"  # auto-detect
+    provider: str = "zai"  # default to Z.ai ("zai" or "google")
 
 @lru_cache(maxsize=10)
 def load_book_cached(folder_name: str) -> Optional[Book]:
@@ -136,40 +141,121 @@ async def serve_image(book_id: str, image_name: str):
 @app.post("/api/translate")
 async def translate_text(req: TranslateRequest):
     """
-    Translate text using Google Translate API.
+    Translate text using either Z.ai API or Google Translate.
     Returns JSON with translated text and detected source language.
     """
     try:
-        # Encode text for URL
-        text_encoded = urllib.parse.quote(req.text)
-        
-        # Build Google Translate API URL
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={req.source_lang}&tl={req.target_lang}&dt=t&q={text_encoded}"
-        
-        # Make request
-        with urllib.request.urlopen(url, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
-        
-        # Parse response
-        # Result format: [[[translated, original, ...]], null, source_lang, ...]
-        if result and len(result) > 0 and result[0]:
-            # Combine all translated segments
-            translated_text = "".join([segment[0] for segment in result[0] if segment[0]])
-            source_lang = result[2] if len(result) > 2 else "unknown"
-            
-            return JSONResponse({
-                "success": True,
-                "translated": translated_text,
-                "source_lang": source_lang,
-                "target_lang": req.target_lang
-            })
+        if req.provider == "zai":
+            return await translate_with_zai(req)
+        elif req.provider == "google":
+            return await translate_with_google(req)
         else:
-            raise HTTPException(status_code=500, detail="Translation failed: Invalid response format")
-            
-    except urllib.error.URLError as e:
-        raise HTTPException(status_code=503, detail=f"Translation service unavailable: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Invalid provider: {req.provider}. Use 'zai' or 'google'")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")
+
+async def translate_with_zai(req: TranslateRequest):
+    """Translate using Z.ai API (GLM-4.5-flash model)"""
+    # Get API credentials from environment variables
+    api_key = os.getenv("ZAI_API_KEY")
+    api_url = os.getenv("ZAI_API_URL", "https://api.z.ai/api/paas/v4/chat/completions")
+    model = os.getenv("ZAI_MODEL", "glm-4.5-flash")
+    
+    if not api_key:
+        raise HTTPException(status_code=500, detail="ZAI_API_KEY not configured in .env file")
+    
+    # Map language codes to full language names for better translation
+    lang_map = {
+        "id": "Indonesian",
+        "en": "English",
+        "zh-CN": "Chinese (Simplified)",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "ar": "Arabic",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ru": "Russian",
+        "pt": "Portuguese",
+        "it": "Italian",
+        "th": "Thai",
+        "vi": "Vietnamese"
+    }
+    
+    target_language = lang_map.get(req.target_lang, req.target_lang)
+    
+    # Prepare the translation prompt
+    prompt = f"Translate the following text to {target_language}. Only provide the translation without any explanations or additional text:\n\n{req.text}"
+    
+    # Prepare the API request
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "stream": False
+    }
+    
+    # Make the API request
+    request_obj = urllib.request.Request(
+        api_url,
+        data=json.dumps(payload).encode('utf-8'),
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        }
+    )
+    
+    with urllib.request.urlopen(request_obj, timeout=30) as response:
+        result = json.loads(response.read().decode('utf-8'))
+    
+    # Parse Z.ai response
+    if result and "choices" in result and len(result["choices"]) > 0:
+        translated_text = result["choices"][0]["message"]["content"].strip()
+        
+        return JSONResponse({
+            "success": True,
+            "translated": translated_text,
+            "source_lang": req.source_lang,
+            "target_lang": req.target_lang,
+            "provider": "zai"
+        })
+    else:
+        raise HTTPException(status_code=500, detail="Z.ai translation failed: Invalid response format")
+
+async def translate_with_google(req: TranslateRequest):
+    """Translate using Google Translate API (unofficial)"""
+    # Encode text for URL
+    text_encoded = urllib.parse.quote(req.text)
+    
+    # Build Google Translate API URL
+    url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={req.source_lang}&tl={req.target_lang}&dt=t&q={text_encoded}"
+    
+    # Make request
+    with urllib.request.urlopen(url, timeout=10) as response:
+        result = json.loads(response.read().decode('utf-8'))
+    
+    # Parse response
+    # Result format: [[[translated, original, ...]], null, source_lang, ...]
+    if result and len(result) > 0 and result[0]:
+        # Combine all translated segments
+        translated_text = "".join([segment[0] for segment in result[0] if segment[0]])
+        source_lang = result[2] if len(result) > 2 else "unknown"
+        
+        return JSONResponse({
+            "success": True,
+            "translated": translated_text,
+            "source_lang": source_lang,
+            "target_lang": req.target_lang,
+            "provider": "google"
+        })
+    else:
+        raise HTTPException(status_code=500, detail="Google translation failed: Invalid response format")
 
 if __name__ == "__main__":
     import uvicorn

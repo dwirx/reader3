@@ -129,14 +129,45 @@ Klik untuk switch antara keduanya!
 
 ### 🌐 Translation API
 
-Menggunakan Google Translate API (unofficial):
-```
-https://translate.googleapis.com/translate_a/single
-```
+Aplikasi ini mendukung **2 Provider Translasi**:
 
-**Note**: Free API dengan rate limiting. Untuk production, gunakan official Google Translate API.
+#### 1. 🤖 Z.ai API (GLM-4.5-flash)
+- Menggunakan AI model yang canggih
+- Terjemahan lebih natural dan kontekstual
+- Memerlukan API key
+
+**Konfigurasi:**
+1. Buat file `.env` di root folder project
+2. Tambahkan credentials:
+   ```
+   ZAI_API_KEY=your_api_key_here
+   ZAI_API_URL=https://api.z.ai/api/paas/v4/chat/completions
+   ZAI_MODEL=glm-4.5-flash
+   ```
+
+#### 2. 🌐 Google Translate
+- Free API (tidak perlu konfigurasi)
+- Cepat dan reliable
+- Rate limiting mungkin berlaku
+
+**Cara Memilih Provider:**
+- Di toolbar translate, pilih provider dari dropdown:
+  - **🤖 Z.ai** - Untuk terjemahan AI yang lebih akurat
+  - **🌐 Google** - Untuk terjemahan cepat tanpa setup
 
 ### 📝 Changelog
+
+**v3.5** (23 Nov 2025)
+- ✅ **Dual Provider Support** - Pilih antara Z.ai atau Google Translate
+- ✅ Provider selector di toolbar
+- ✅ Emoji indicators untuk setiap provider
+- ✅ Fleksibel: AI translation atau free translation
+
+**v3.4** (23 Nov 2025)
+- ✅ **Z.ai API Integration** - Menggunakan GLM-4.5-flash model
+- ✅ Environment variables dengan .env file
+- ✅ Terjemahan lebih natural dan akurat
+- ✅ Support 14+ bahasa
 
 **v3.3** (23 Nov 2025)
 - ✅ **Full Mobile Responsive** - Perfect untuk smartphone & tablet
@@ -166,5 +197,5 @@ https://translate.googleapis.com/translate_a/single
 
 ---
 
-**Dibuat dengan ❤️ menggunakan FastAPI, Jinja2, dan Google Translate API**
+**Dibuat dengan ❤️ menggunakan FastAPI, Jinja2, Z.ai API, dan Google Translate**
 
