@@ -113,6 +113,192 @@
             box-shadow: 0 6px 16px rgba(255, 153, 0, 0.5);
         }
         
+        .sort-select {
+            padding: 14px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.95);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #0f0f0f;
+            min-width: 180px;
+        }
+        
+        .sort-select:hover {
+            border-color: #ff9900;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: #ff9900;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .view-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            color: #5a5a5a;
+        }
+        
+        .view-btn:hover {
+            background: rgba(255, 153, 0, 0.1);
+            color: #ff9900;
+        }
+        
+        .view-btn.active {
+            background: #ff9900;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+        }
+        
+        /* Hardcover View Styles */
+        .book-grid.hardcover-view {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            perspective: 1000px;
+        }
+        
+        .book-grid.hardcover-view .book-card {
+            width: 180px;
+            height: 280px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0;
+            box-shadow: 
+                8px 0 15px rgba(0, 0, 0, 0.3),
+                -2px 0 5px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, #f5f5f5 0%, #ffffff 5%, #ffffff 95%, #e8e8e8 100%);
+            border-left: 3px solid #d4cfc4;
+            border-right: 2px solid #e8e8e8;
+        }
+        
+        .book-grid.hardcover-view .book-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(0,0,0,0.15) 0%, 
+                transparent 3%, 
+                transparent 97%, 
+                rgba(0,0,0,0.1) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .book-grid.hardcover-view .book-card:hover {
+            transform: translateY(-15px) rotateY(-5deg) scale(1.05);
+            box-shadow: 
+                15px 5px 30px rgba(0, 0, 0, 0.4),
+                -5px 0 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .book-grid.hardcover-view .book-cover {
+            height: 100%;
+            border-radius: 0;
+        }
+        
+        .book-grid.hardcover-view .book-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 70%, transparent 100%);
+            padding: 15px 12px 12px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 2;
+        }
+        
+        .book-grid.hardcover-view .book-card:hover .book-info {
+            opacity: 1;
+        }
+        
+        .book-grid.hardcover-view .book-title {
+            color: white;
+            font-size: 0.95em;
+            -webkit-line-clamp: 2;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .book-grid.hardcover-view .book-author {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.8em;
+            -webkit-line-clamp: 1;
+        }
+        
+        .book-grid.hardcover-view .book-chapters {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.75em;
+        }
+        
+        .book-grid.hardcover-view .book-meta {
+            display: none;
+        }
+        
+        .book-grid.hardcover-view .book-actions {
+            margin-top: 8px;
+            gap: 6px;
+        }
+        
+        .book-grid.hardcover-view .btn {
+            padding: 8px 12px;
+            font-size: 0.85em;
+            background: rgba(35, 47, 62, 0.9);
+        }
+        
+        .book-grid.hardcover-view .btn:hover {
+            background: rgba(55, 71, 90, 0.95);
+        }
+        
+        .book-grid.hardcover-view .btn-delete {
+            background: rgba(211, 47, 47, 0.9);
+        }
+        
+        .book-grid.hardcover-view .btn-delete:hover {
+            background: rgba(183, 28, 28, 0.95);
+        }
+        
+        /* Spine effect for hardcover */
+        .book-grid.hardcover-view .book-card::after {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                #c4bfb4 0%, 
+                #d4cfc4 20%, 
+                #d4cfc4 80%, 
+                #b4afa4 100%);
+            box-shadow: -1px 0 2px rgba(0,0,0,0.3);
+        }
+        
         /* Book Grid */
         .book-grid { 
             display: grid; 
@@ -229,8 +415,38 @@
         .book-chapters {
             color: #888;
             font-size: 0.85em;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             font-weight: 500;
+        }
+        
+        .book-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 15px;
+            font-size: 0.8em;
+            color: #999;
+        }
+        
+        .book-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .book-meta-icon {
+            font-size: 0.9em;
+        }
+        
+        .book-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            background: #ff9900;
+            color: white;
+            margin-left: 5px;
         }
         
         .book-actions {
@@ -537,6 +753,55 @@
                 font-size: 1.05em;
             }
             
+            .sort-select {
+                width: 100%;
+                padding: 16px 20px;
+                font-size: 1.05em;
+            }
+            
+            .view-toggle {
+                width: 100%;
+                justify-content: center;
+                padding: 6px;
+            }
+            
+            .view-btn {
+                flex: 1;
+                padding: 12px 20px;
+                font-size: 1.3em;
+            }
+            
+            /* Hardcover view adjustments for mobile */
+            .book-grid.hardcover-view {
+                gap: 20px;
+            }
+            
+            .book-grid.hardcover-view .book-card {
+                width: 140px;
+                height: 220px;
+            }
+            
+            .book-grid.hardcover-view .book-info {
+                padding: 12px 10px 10px;
+            }
+            
+            .book-grid.hardcover-view .book-title {
+                font-size: 0.85em;
+            }
+            
+            .book-grid.hardcover-view .book-author {
+                font-size: 0.75em;
+            }
+            
+            .book-grid.hardcover-view .book-chapters {
+                font-size: 0.7em;
+            }
+            
+            .book-grid.hardcover-view .btn {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+            
             .book-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 16px;
@@ -566,6 +831,16 @@
             
             .book-info {
                 padding: 16px;
+            }
+            
+            .book-meta {
+                font-size: 0.75em;
+                gap: 4px;
+            }
+            
+            .book-badge {
+                font-size: 0.7em;
+                padding: 2px 6px;
             }
             
             .btn {
@@ -671,6 +946,20 @@
                        placeholder="Search books by title or author..." 
                        value="{{ search_query }}">
             </div>
+            <select class="sort-select" id="sortSelect" onchange="sortBooks(this.value)">
+                <option value="recent">📅 Recently Read</option>
+                <option value="title">📚 Title (A-Z)</option>
+                <option value="author">✍️ Author</option>
+                <option value="newest">⬆️ Newest Added</option>
+            </select>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" onclick="switchView('grid')" title="Grid View">
+                    <span>⊞</span>
+                </button>
+                <button class="view-btn" data-view="hardcover" onclick="switchView('hardcover')" title="Hardcover View">
+                    <span>📚</span>
+                </button>
+            </div>
             <button class="upload-btn" onclick="openUploadModal()">
                 <span>📤</span>
                 <span>Upload EPUB</span>
@@ -708,6 +997,21 @@
                     <div class="book-title">{{ book.title }}</div>
                     <div class="book-author">{{ book.author }}</div>
                     <div class="book-chapters">📖 {{ book.chapters }} chapters</div>
+                    <div class="book-meta">
+                        {% if book.last_read %}
+                        <div class="book-meta-item" {% if book.last_read_full %}title="Full: {{ book.last_read_full }}"{% endif %}>
+                            <span class="book-meta-icon">📅</span>
+                            <span>Last read: {{ book.last_read }}</span>
+                            <span class="book-badge">Recent</span>
+                        </div>
+                        {% endif %}
+                        {% if book.uploaded_date %}
+                        <div class="book-meta-item">
+                            <span class="book-meta-icon">⬆️</span>
+                            <span>Added: {{ book.uploaded_date }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
                     <div class="book-actions">
                         <a href="/read/{{ book.id }}/0" class="btn">Read</a>
                         <button class="btn btn-delete" onclick="deleteBook('{{ book.id }}', '{{ book.title }}')">🗑️</button>
@@ -939,6 +1243,88 @@
                 closeUploadModal();
             }
         });
+        
+        // Sort books functionality
+        function sortBooks(sortBy) {
+            const grid = document.querySelector('.book-grid');
+            if (!grid) return;
+            
+            const cards = Array.from(grid.querySelectorAll('.book-card'));
+            
+            cards.sort((a, b) => {
+                const titleA = a.querySelector('.book-title').textContent.toLowerCase();
+                const titleB = b.querySelector('.book-title').textContent.toLowerCase();
+                const authorA = a.querySelector('.book-author').textContent.toLowerCase();
+                const authorB = b.querySelector('.book-author').textContent.toLowerCase();
+                
+                switch(sortBy) {
+                    case 'title':
+                        return titleA.localeCompare(titleB);
+                    case 'author':
+                        return authorA.localeCompare(authorB);
+                    case 'newest':
+                        // Sort by uploaded date (newest first)
+                        const dateA = a.querySelector('.book-meta-item:last-child span:nth-child(2)')?.textContent || '';
+                        const dateB = b.querySelector('.book-meta-item:last-child span:nth-child(2)')?.textContent || '';
+                        return dateB.localeCompare(dateA);
+                    case 'recent':
+                    default:
+                        // Sort by last read (most recent first)
+                        const hasRecentA = a.querySelector('.book-badge') ? 1 : 0;
+                        const hasRecentB = b.querySelector('.book-badge') ? 1 : 0;
+                        if (hasRecentA !== hasRecentB) {
+                            return hasRecentB - hasRecentA;
+                        }
+                        return titleA.localeCompare(titleB);
+                }
+            });
+            
+            // Re-append sorted cards
+            cards.forEach(card => grid.appendChild(card));
+            
+            // Save preference
+            localStorage.setItem('bookSortPreference', sortBy);
+        }
+        
+        // Load sort preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedSort = localStorage.getItem('bookSortPreference');
+            if (savedSort) {
+                document.getElementById('sortSelect').value = savedSort;
+                sortBooks(savedSort);
+            }
+            
+            // Load view preference
+            const savedView = localStorage.getItem('bookViewPreference') || 'grid';
+            switchView(savedView);
+        });
+        
+        // Switch between grid and hardcover view
+        function switchView(viewType) {
+            const grid = document.querySelector('.book-grid');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            if (!grid) return;
+            
+            // Update grid class
+            if (viewType === 'hardcover') {
+                grid.classList.add('hardcover-view');
+            } else {
+                grid.classList.remove('hardcover-view');
+            }
+            
+            // Update button states
+            buttons.forEach(btn => {
+                if (btn.dataset.view === viewType) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Save preference
+            localStorage.setItem('bookViewPreference', viewType);
+        }
     </script>
 </body>
 </html>

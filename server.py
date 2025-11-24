@@ -40,7 +40,7 @@ class TranslateRequest(BaseModel):
     text: str
     target_lang: str = "id"  # default to Indonesian
     source_lang: str = "auto"  # auto-detect
-    provider: str = "zai"  # default to Z.ai ("zai" or "google")
+    provider: str = "google"  # default to Google Translate ("zai" or "google")
 
 @lru_cache(maxsize=20)
 def load_book_cached(folder_name: str) -> Optional[Book]:
@@ -68,6 +68,7 @@ def load_book_cached(folder_name: str) -> Optional[Book]:
 @app.get("/", response_class=HTMLResponse)
 async def library_view(request: Request, search: Optional[str] = None):
     """Lists all available processed books."""
+    import datetime
     books = []
 
     # Scan directory for folders ending in '_data' that have a book.pkl
@@ -99,13 +100,53 @@ async def library_view(request: Request, search: Optional[str] = None):
                             first_image = sorted(image_files)[0]
                             cover_url = f"/library/{item}/cover/{first_image}"
                     
+                    # Get upload date from directory creation time with time
+                    uploaded_timestamp = os.path.getctime(item_path)
+                    uploaded_datetime = datetime.datetime.fromtimestamp(uploaded_timestamp)
+                    uploaded_date = uploaded_datetime.strftime("%d %b %Y, %H:%M")
+                    
+                    # Get last read date from last access time of book.pkl
+                    pkl_path = os.path.join(item_path, "book.pkl")
+                    last_read = None
+                    last_read_full = None
+                    if os.path.exists(pkl_path):
+                        last_access = os.path.getatime(pkl_path)
+                        last_access_dt = datetime.datetime.fromtimestamp(last_access)
+                        
+                        # Calculate time difference
+                        now = datetime.datetime.now()
+                        time_diff = now - last_access_dt
+                        hours_ago = time_diff.total_seconds() / 3600
+                        days_ago = time_diff.days
+                        
+                        # Format full datetime for tooltip
+                        last_read_full = last_access_dt.strftime("%d %b %Y, %H:%M")
+                        
+                        # Only show if accessed in last 30 days
+                        if days_ago < 30:
+                            if hours_ago < 1:
+                                minutes = int(time_diff.total_seconds() / 60)
+                                last_read = f"{minutes} min ago" if minutes > 0 else "Just now"
+                            elif hours_ago < 24:
+                                last_read = f"{int(hours_ago)} hours ago"
+                            elif days_ago < 1:
+                                last_read = f"Today at {last_access_dt.strftime('%H:%M')}"
+                            elif days_ago < 2:
+                                last_read = f"Yesterday at {last_access_dt.strftime('%H:%M')}"
+                            else:
+                                last_read = f"{days_ago} days ago"
+                    
                     book_data = {
                         "id": item,
                         "title": book.metadata.title,
                         "author": ", ".join(book.metadata.authors) if book.metadata.authors else "Unknown",
                         "chapters": len(book.spine),
                         "cover": cover_url,
-                        "description": book.metadata.description or ""
+                        "description": book.metadata.description or "",
+                        "uploaded_date": uploaded_date,
+                        "last_read": last_read,
+                        "last_read_full": last_read_full,
+                        "last_access_timestamp": last_access if last_read else 0
                     }
                     
                     # Apply search filter if provided
@@ -117,8 +158,8 @@ async def library_view(request: Request, search: Optional[str] = None):
                     else:
                         books.append(book_data)
     
-    # Sort books by title
-    books.sort(key=lambda x: x["title"].lower())
+    # Sort books by last read (most recent first), then by title
+    books.sort(key=lambda x: (-x.get("last_access_timestamp", 0), x["title"].lower()))
 
     return templates.TemplateResponse("library.html", {
         "request": request, 

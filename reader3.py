@@ -65,6 +65,7 @@ class Book:
     # Meta info
     source_file: str
     processed_at: str
+    upload_date: str = ""  # Tanggal upload untuk sorting
     version: str = "3.0"
 
 
@@ -272,13 +273,15 @@ def process_epub(epub_path: str, output_dir: str) -> Book:
             spine_chapters.append(chapter)
 
     # 7. Final Assembly
+    current_time = datetime.now()
     final_book = Book(
         metadata=metadata,
         spine=spine_chapters,
         toc=toc_structure,
         images=image_map,
         source_file=os.path.basename(epub_path),
-        processed_at=datetime.now().isoformat()
+        processed_at=current_time.isoformat(),
+        upload_date=current_time.isoformat()
     )
 
     return final_book
