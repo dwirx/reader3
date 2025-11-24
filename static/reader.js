@@ -13,20 +13,320 @@ document.addEventListener('DOMContentLoaded', function() {
     initKeyboardShortcuts();
     initToolbarToggle();
     initMobileFeatures();
+    addHeadingIds();
+    scrollToAnchor();
+});
+
+// Handle hash changes (when clicking TOC links on same page)
+window.addEventListener('hashchange', scrollToAnchor);
+
+// Add IDs to headings if they don't have one
+function addHeadingIds() {
+    const content = document.querySelector('.book-content');
+    if (!content) return;
+    
+    const headings = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach((heading, index) => {
+        if (!heading.id) {
+            // Create ID from heading text
+            const text = heading.textContent.trim();
+            const id = text
+                .toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .substring(0, 50);
+            
+            heading.id = id || `heading-${index}`;
+        }
+    });
+}
+
+// Handle internal links in content
+document.addEventListener('DOMContentLoaded', function() {
+    const content = document.querySelector('.book-content');
+    if (content) {
+        content.addEventListener('click', function(e) {
+            const link = e.target.closest('a[href^="#"]');
+            if (link) {
+                e.preventDefault();
+                const hash = link.getAttribute('href').substring(1);
+                scrollToElement(hash);
+                window.location.hash = hash;
+            }
+        });
+    }
 });
 
 /* ===== TOC Navigation ===== */
-function findAndGo(filename) {
+function findAndGo(filename, tocTitle) {
+    console.log('=== findAndGo START ===');
+    console.log('Filename:', filename);
+    console.log('TOC Title:', tocTitle);
+    
     // spineMap is defined in the HTML template
     const cleanFile = filename.split('#')[0];
-    const anchor = filename.split('#')[1];
+    let anchor = filename.split('#')[1];
     const idx = window.spineMap[cleanFile];
 
+    // If no anchor but we have TOC title, create anchor from title
+    if (!anchor && tocTitle) {
+        anchor = tocTitle
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .substring(0, 50);
+        console.log('Created anchor from title:', anchor);
+    }
+
     if (idx !== undefined) {
-        let url = `/read/${window.bookId}/${idx}`;
-        window.location.href = url;
+        // Check if it's the same chapter
+        const currentUrl = window.location.pathname;
+        const targetUrl = `/read/${window.bookId}/${idx}`;
+        
+        console.log('Current URL:', currentUrl);
+        console.log('Target URL:', targetUrl);
+        console.log('Same chapter?', currentUrl === targetUrl);
+        
+        if (currentUrl === targetUrl) {
+            // Same chapter
+            if (anchor) {
+                console.log('Same chapter, scrolling to anchor:', anchor);
+                // Small delay to ensure DOM is ready
+                setTimeout(() => {
+                    scrollToElement(anchor);
+                }, 100);
+            } else {
+                console.log('Same chapter, no anchor, scrolling to top');
+                const mainContainer = document.getElementById('main');
+                if (mainContainer) {
+                    mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        } else {
+            // Different chapter, navigate
+            let url = targetUrl;
+            if (anchor) {
+                url += '#' + anchor;
+            }
+            console.log('Navigating to:', url);
+            window.location.href = url;
+        }
     } else {
-        console.log("Could not find index for", filename);
+        console.error("Could not find index for", filename);
+        console.log('Available spine entries:', Object.keys(window.spineMap));
+    }
+    console.log('=== findAndGo END ===');
+}
+
+// Scroll to specific element by ID or text
+function scrollToElement(identifier) {
+    console.log('Scrolling to:', identifier);
+    
+    let element = document.getElementById(identifier);
+    console.log('Found by ID:', element);
+    
+    // Try to find by name attribute
+    if (!element) {
+        element = document.querySelector(`[name="${identifier}"]`);
+        console.log('Found by name:', element);
+    }
+    
+    // Try to find heading with matching text
+    if (!element) {
+        const searchText = identifier.toLowerCase().replace(/-|_/g, ' ').replace(/\./g, ' ').trim();
+        const headings = document.querySelectorAll('.book-content h1, .book-content h2, .book-content h3, .book-content h4, .book-content h5, .book-content h6');
+        
+        console.log('Searching in', headings.length, 'headings for:', searchText);
+        
+        // First pass: exact match
+        for (const heading of headings) {
+            const headingText = heading.textContent.trim().toLowerCase();
+            if (headingText === searchText) {
+                element = heading;
+                console.log('Found by exact match:', heading.textContent);
+                break;
+            }
+        }
+        
+        // Second pass: contains match
+        if (!element) {
+            for (const heading of headings) {
+                const headingText = heading.textContent.trim().toLowerCase();
+                if (headingText.includes(searchText) || searchText.includes(headingText)) {
+                    element = heading;
+                    console.log('Found by contains match:', heading.textContent);
+                    break;
+                }
+            }
+        }
+        
+        // Third pass: fuzzy match (remove all spaces and special chars)
+        if (!element) {
+            const fuzzySearch = searchText.replace(/[^a-z0-9]/g, '');
+            for (const heading of headings) {
+                const fuzzyHeading = heading.textContent.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (fuzzyHeading.includes(fuzzySearch) || fuzzySearch.includes(fuzzyHeading)) {
+                    element = heading;
+                    console.log('Found by fuzzy match:', heading.textContent);
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Last resort: search in all elements with text content
+    if (!element) {
+        const allElements = document.querySelectorAll('.book-content p, .book-content div, .book-content section, .book-content article');
+        const searchText = identifier.toLowerCase().replace(/-|_/g, ' ').trim();
+        
+        for (const el of allElements) {
+            const text = el.textContent.trim().toLowerCase();
+            if (text.startsWith(searchText)) {
+                element = el;
+                console.log('Found in content (starts with):', el.textContent.substring(0, 50));
+                break;
+            }
+        }
+    }
+    
+    if (element) {
+        console.log('Scrolling to element:', element);
+        
+        // Ensure element is in view
+        const isMobile = window.innerWidth <= 768;
+        const offset = isMobile ? 100 : 120;
+        
+        // Get the scrollable container - #main is the actual scroll container
+        const mainContainer = document.getElementById('main');
+        
+        if (mainContainer) {
+            // Calculate position relative to the scrollable container
+            const containerRect = mainContainer.getBoundingClientRect();
+            const elementRect = element.getBoundingClientRect();
+            
+            // Current scroll position of the container
+            const currentScroll = mainContainer.scrollTop;
+            
+            // Element position relative to container
+            const elementTopRelativeToContainer = elementRect.top - containerRect.top;
+            
+            // Target scroll position
+            const targetScrollPosition = currentScroll + elementTopRelativeToContainer - offset;
+            
+            console.log('Container scroll:', currentScroll);
+            console.log('Element relative position:', elementTopRelativeToContainer);
+            console.log('Target scroll position:', targetScrollPosition);
+            
+            // Scroll the container
+            mainContainer.scrollTo({
+                top: targetScrollPosition,
+                behavior: 'smooth'
+            });
+        } else {
+            // Fallback to window scroll
+            const elementRect = element.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.pageYOffset;
+            const targetScrollPosition = absoluteElementTop - offset;
+            
+            console.log('Using window scroll. Target:', targetScrollPosition);
+            
+            window.scrollTo({
+                top: targetScrollPosition,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Highlight element briefly
+        setTimeout(() => {
+            highlightElement(element);
+        }, 400);
+        
+        // Update URL hash
+        if (element.id) {
+            history.replaceState(null, null, '#' + element.id);
+        }
+    } else {
+        console.warn('Element not found for identifier:', identifier);
+        console.log('Available headings:');
+        const headings = document.querySelectorAll('.book-content h1, .book-content h2, .book-content h3');
+        headings.forEach((h, i) => {
+            console.log(`  ${i}: "${h.textContent.trim()}" (id: ${h.id || 'none'})`);
+        });
+    }
+}
+
+// Highlight element with animation
+function highlightElement(element) {
+    // Verify element is in viewport
+    const mainContainer = document.getElementById('main');
+    if (mainContainer) {
+        const containerRect = mainContainer.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        
+        console.log('Container top:', containerRect.top, 'Element top:', elementRect.top);
+        console.log('Element is visible:', elementRect.top >= containerRect.top && elementRect.top <= containerRect.bottom);
+    }
+    
+    // Save original styles
+    const originalBg = element.style.backgroundColor;
+    const originalPadding = element.style.padding;
+    const originalBorderRadius = element.style.borderRadius;
+    const originalBoxShadow = element.style.boxShadow;
+    const originalTransform = element.style.transform;
+    
+    // Apply highlight
+    element.style.transition = 'all 0.3s ease';
+    element.style.backgroundColor = 'rgba(255, 204, 0, 0.5)';
+    element.style.borderRadius = '6px';
+    element.style.padding = '10px 14px';
+    element.style.boxShadow = '0 0 0 5px rgba(255, 204, 0, 0.25)';
+    element.style.transform = 'scale(1.03)';
+    
+    // Pulse effect
+    setTimeout(() => {
+        element.style.backgroundColor = 'rgba(255, 204, 0, 0.3)';
+        element.style.boxShadow = '0 0 0 3px rgba(255, 204, 0, 0.15)';
+        element.style.transform = 'scale(1.01)';
+    }, 400);
+    
+    // Second pulse
+    setTimeout(() => {
+        element.style.backgroundColor = 'rgba(255, 204, 0, 0.4)';
+        element.style.boxShadow = '0 0 0 4px rgba(255, 204, 0, 0.2)';
+        element.style.transform = 'scale(1.02)';
+    }, 800);
+    
+    // Fade out
+    setTimeout(() => {
+        element.style.backgroundColor = 'rgba(255, 204, 0, 0.15)';
+        element.style.boxShadow = '0 0 0 2px rgba(255, 204, 0, 0.1)';
+        element.style.transform = 'scale(1)';
+    }, 1200);
+    
+    // Remove highlight
+    setTimeout(() => {
+        element.style.transition = 'all 0.5s ease';
+        element.style.backgroundColor = originalBg;
+        element.style.boxShadow = originalBoxShadow;
+        element.style.transform = originalTransform;
+        
+        setTimeout(() => {
+            element.style.padding = originalPadding;
+            element.style.borderRadius = originalBorderRadius;
+        }, 500);
+    }, 3000);
+}
+
+// Scroll to anchor with offset for toolbar
+function scrollToAnchor() {
+    if (window.location.hash) {
+        setTimeout(() => {
+            const hash = window.location.hash.substring(1);
+            console.log('scrollToAnchor called with hash:', hash);
+            scrollToElement(hash);
+        }, 300);
     }
 }
 

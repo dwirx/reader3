@@ -22,8 +22,10 @@
             {% for item in items %}
                 <li class="toc-item">
                     {% set is_active = current_chapter.href == item.file_href %}
-                    <a href="#" onclick="findAndGo('{{ item.file_href }}')"
-                       class="toc-link {% if is_active %}active{% endif %}">
+                    <a href="#" onclick="findAndGo('{{ item.file_href }}', '{{ item.title|replace("'", "\\'") }}'); return false;"
+                       class="toc-link {% if is_active %}active{% endif %}"
+                       data-href="{{ item.file_href }}"
+                       data-title="{{ item.title }}">
                         {{ item.title }}
                     </a>
                     {% if item.children %}

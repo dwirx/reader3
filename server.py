@@ -83,15 +83,20 @@ async def library_view(request: Request, search: Optional[str] = None):
                     cover_url = None
                     images_dir = os.path.join(item_path, "images")
                     if os.path.exists(images_dir):
+                        # Filter only image files
+                        image_files = [f for f in os.listdir(images_dir) 
+                                     if f.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp'))]
+                        
                         # Look for cover image (common names)
-                        for cover_name in os.listdir(images_dir):
+                        for cover_name in image_files:
                             if 'cover' in cover_name.lower():
                                 cover_path = os.path.join(images_dir, cover_name)
                                 cover_url = f"/library/{item}/cover/{cover_name}"
                                 break
+                        
                         # If no cover found, use first image
-                        if not cover_url and os.listdir(images_dir):
-                            first_image = sorted(os.listdir(images_dir))[0]
+                        if not cover_url and image_files:
+                            first_image = sorted(image_files)[0]
                             cover_url = f"/library/{item}/cover/{first_image}"
                     
                     book_data = {
@@ -197,7 +202,23 @@ async def serve_cover(book_id: str, image_name: str):
     if not os.path.exists(img_path):
         raise HTTPException(status_code=404, detail="Cover not found")
     
-    return FileResponse(img_path)
+    # Determine media type
+    media_type = "image/jpeg"
+    if image_name.lower().endswith('.png'):
+        media_type = "image/png"
+    elif image_name.lower().endswith('.gif'):
+        media_type = "image/gif"
+    elif image_name.lower().endswith('.webp'):
+        media_type = "image/webp"
+    
+    return FileResponse(
+        img_path, 
+        media_type=media_type,
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "Accept-Ranges": "bytes"
+        }
+    )
 
 @app.post("/upload")
 async def upload_epub(file: UploadFile = File(...)):

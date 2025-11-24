@@ -138,7 +138,6 @@
         .book-cover {
             width: 100%;
             height: 300px;
-            object-fit: cover;
             background: linear-gradient(135deg, #232f3e 0%, #37475a 100%);
             display: flex;
             align-items: center;
@@ -149,26 +148,54 @@
             overflow: hidden;
         }
         
-        .book-cover::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.5s;
-        }
-        
-        .book-card:hover .book-cover::before {
-            left: 100%;
-        }
-        
         .book-cover img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .book-cover img.loaded {
+            opacity: 1;
+        }
+        
+        .book-cover .cover-placeholder {
+            font-size: 4em;
+            z-index: 1;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .book-cover img.loaded ~ .cover-placeholder {
+            opacity: 0;
+        }
+        
+        .book-cover img.loaded ~ .loading-spinner {
+            display: none;
+        }
+        
+        .book-cover .loading-spinner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 2;
+            display: none;
+        }
+        
+        .book-cover img:not(.loaded) ~ .loading-spinner {
+            display: block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         .book-info {
@@ -519,6 +546,16 @@
                 height: 220px;
             }
             
+            .book-cover .cover-placeholder {
+                font-size: 3em;
+            }
+            
+            .book-cover .loading-spinner {
+                width: 32px;
+                height: 32px;
+                border-width: 2px;
+            }
+            
             .book-title {
                 font-size: 1.05em;
             }
@@ -597,6 +634,16 @@
                 height: 200px;
             }
             
+            .book-cover .cover-placeholder {
+                font-size: 2.5em;
+            }
+            
+            .book-cover .loading-spinner {
+                width: 30px;
+                height: 30px;
+                border-width: 2px;
+            }
+            
             h1 {
                 font-size: 1.8em;
             }
@@ -648,10 +695,14 @@
             <div class="book-card">
                 <div class="book-cover">
                     {% if book.cover %}
-                    <img src="{{ book.cover }}" alt="{{ book.title }}" onerror="this.parentElement.innerHTML='📚'">
-                    {% else %}
-                    📚
+                    <img src="{{ book.cover }}" 
+                         alt="{{ book.title }}" 
+                         loading="lazy"
+                         onload="this.classList.add('loaded'); this.nextElementSibling.style.display='none';"
+                         onerror="handleImageError(this)">
+                    <div class="loading-spinner"></div>
                     {% endif %}
+                    <div class="cover-placeholder">📚</div>
                 </div>
                 <div class="book-info">
                     <div class="book-title">{{ book.title }}</div>
@@ -856,6 +907,31 @@
                 notification.style.display = 'none';
             }, 3000);
         }
+        
+        // Handle image loading errors
+        function handleImageError(img) {
+            img.style.display = 'none';
+            const placeholder = img.parentElement.querySelector('.cover-placeholder');
+            const spinner = img.parentElement.querySelector('.loading-spinner');
+            if (placeholder) {
+                placeholder.style.opacity = '1';
+            }
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
+        }
+        
+        // Preload images for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.book-cover img');
+            images.forEach(img => {
+                if (img.complete && img.naturalHeight !== 0) {
+                    img.classList.add('loaded');
+                    const spinner = img.parentElement.querySelector('.loading-spinner');
+                    if (spinner) spinner.style.display = 'none';
+                }
+            });
+        });
         
         // Close modal on outside click
         document.getElementById('uploadModal').addEventListener('click', function(e) {
