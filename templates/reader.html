@@ -63,14 +63,17 @@
             </div>
         </div>
     </div>
-
-    <!-- Toolbar Toggle Button -->
-    <button class="toolbar-toggle toolbar-visible" onclick="toggleToolbar()" title="Hide/Show Toolbar (Ctrl+H)" aria-label="Toggle toolbar">
-        ✕
+    
+    <!-- Toolbar Toggle Button (when hidden) -->
+    <button class="toolbar-toggle" onclick="toggleToolbar()" title="Show Toolbar (Ctrl+H)" aria-label="Show toolbar" style="display: none;">
+        🌐
     </button>
 
     <!-- Translation Toolbar -->
     <div class="translate-toolbar">
+        <button class="toolbar-close" onclick="toggleToolbar()" title="Hide Toolbar (Ctrl+H)" aria-label="Close toolbar">
+            ✕
+        </button>
         <div class="toolbar-row">
             <select class="provider-select" id="providerSelect" title="Translation Provider">
                 <option value="zai">🤖 Z.ai</option>
@@ -102,6 +105,11 @@
             </button>
         </div>
     </div>
+    
+    <!-- Show Toolbar Button (appears when toolbar is hidden) -->
+    <button class="toolbar-toggle" onclick="toggleToolbar()" title="Show Toolbar (Ctrl+H)" aria-label="Show toolbar">
+        🌐
+    </button>
 
     <script>
         // Pass data from backend to JavaScript

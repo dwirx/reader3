@@ -345,11 +345,15 @@ function sleep(ms) {
 function initToolbarToggle() {
     // Load saved state from localStorage
     const isHidden = localStorage.getItem('toolbarHidden') === 'true';
+    const toolbar = document.querySelector('.translate-toolbar');
+    const toggleBtn = document.querySelector('.toolbar-toggle');
+    
     if (isHidden) {
-        document.querySelector('.translate-toolbar').classList.add('hidden');
-        document.querySelector('.toolbar-toggle').classList.remove('toolbar-visible');
+        toolbar.classList.add('hidden');
+        toggleBtn.style.display = 'flex';
     } else {
-        document.querySelector('.toolbar-toggle').classList.add('toolbar-visible');
+        toolbar.classList.remove('hidden');
+        toggleBtn.style.display = 'none';
     }
 }
 
@@ -360,17 +364,15 @@ function toggleToolbar() {
     if (toolbar.classList.contains('hidden')) {
         // Show toolbar
         toolbar.classList.remove('hidden');
-        toggleBtn.classList.add('toolbar-visible');
-        toggleBtn.innerHTML = '✕';
+        toggleBtn.style.display = 'none';
         localStorage.setItem('toolbarHidden', 'false');
         showStatus('Toolbar shown', 'success');
     } else {
         // Hide toolbar
         toolbar.classList.add('hidden');
-        toggleBtn.classList.remove('toolbar-visible');
-        toggleBtn.innerHTML = '🌐';
+        toggleBtn.style.display = 'flex';
         localStorage.setItem('toolbarHidden', 'true');
-        showStatus('Toolbar hidden (Press Ctrl+H or click 🌐)', 'success');
+        showStatus('Toolbar hidden (Press Ctrl+H or click 🌐 to show)', 'success');
     }
 }
 
