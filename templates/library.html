@@ -13,161 +13,248 @@
         }
         
         body { 
-            font-family: "Bookerly", "Georgia", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background: linear-gradient(135deg, #232f3e 0%, #37475a 100%); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 50%, #1a1f2e 100%); 
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
+            color: #e2e8f0;
         }
         
         .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
+            max-width: 1600px; 
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         header {
             text-align: center;
-            margin-bottom: 40px;
+            padding: 16px 20px;
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
         }
         
         h1 { 
-            color: white; 
-            font-size: 3em;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            margin-bottom: 10px;
+            color: #f7fafc; 
+            font-size: 1.5em;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            font-family: "Bookerly", "Georgia", serif;
+            gap: 10px;
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.3px;
+        }
+        
+        h1 span:first-child {
+            font-size: 1.3em;
         }
         
         .subtitle {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.2em;
-            margin-bottom: 30px;
+            color: #a0aec0;
+            font-size: 0.8em;
+            margin: 4px 0 0 0;
+            font-weight: 400;
         }
         
         /* Upload and Search Bar */
         .action-bar {
-            display: flex;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 12px;
             margin-bottom: 30px;
-            flex-wrap: wrap;
+            align-items: center;
+            padding: 0 4px;
         }
         
         .search-box {
-            flex: 1;
-            min-width: 300px;
             position: relative;
+            width: 100%;
         }
         
         .search-input {
             width: 100%;
-            padding: 14px 20px 14px 50px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-size: 1em;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.95);
+            padding: 13px 20px 13px 48px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(45, 55, 72, 0.6);
+            color: #e2e8f0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-input::placeholder {
+            color: #a0aec0;
         }
         
         .search-input:focus {
             outline: none;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 153, 0, 0.3);
+            transform: translateY(-1px);
             border-color: #ff9900;
-            background: white;
+            background: rgba(45, 55, 72, 0.8);
         }
         
         .search-icon {
             position: absolute;
-            left: 18px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.2em;
-            color: #999;
+            font-size: 1.1em;
+            color: #a0aec0;
+            pointer-events: none;
         }
         
         .upload-btn {
-            background: linear-gradient(135deg, #ff9900 0%, #fa8900 100%);
+            background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%);
             color: white;
             border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1em;
+            padding: 13px 24px;
+            border-radius: 12px;
+            font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
         
         .upload-btn:hover {
-            background: linear-gradient(135deg, #fa8900 0%, #e67e00 100%);
+            background: linear-gradient(135deg, #ff7700 0%, #ff6600 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 153, 0, 0.5);
+            box-shadow: 0 6px 20px rgba(255, 153, 0, 0.5);
+        }
+        
+        .upload-btn:active {
+            transform: translateY(0);
         }
         
         .sort-select {
-            padding: 14px 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            font-size: 1em;
+            padding: 13px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            font-size: 0.9em;
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(45, 55, 72, 0.6);
+            color: #e2e8f0;
             cursor: pointer;
-            transition: all 0.3s ease;
-            color: #0f0f0f;
-            min-width: 180px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 160px;
+            backdrop-filter: blur(10px);
         }
         
         .sort-select:hover {
             border-color: #ff9900;
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: rgba(45, 55, 72, 0.8);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
         }
         
         .sort-select:focus {
             outline: none;
             border-color: #ff9900;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 16px rgba(255, 153, 0, 0.3);
+        }
+        
+        .sort-select option {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 10px;
         }
         
         .view-toggle {
             display: flex;
             gap: 4px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(45, 55, 72, 0.6);
             padding: 4px;
-            border-radius: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
         }
         
         .view-btn {
             background: transparent;
             border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
+            padding: 10px 14px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-            color: #5a5a5a;
+            font-size: 1.1em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #a0aec0;
         }
         
         .view-btn:hover {
-            background: rgba(255, 153, 0, 0.1);
+            background: rgba(255, 153, 0, 0.15);
             color: #ff9900;
+            transform: scale(1.05);
         }
         
         .view-btn.active {
-            background: #ff9900;
+            background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%);
             color: white;
-            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(255, 153, 0, 0.4);
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 0 4px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(45, 55, 72, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stat-item:hover {
+            background: rgba(45, 55, 72, 0.7);
+            border-color: rgba(255, 153, 0, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-icon {
+            font-size: 1.6em;
+            opacity: 0.8;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #f7fafc;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.75em;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
         
         /* Hardcover View Styles */
@@ -302,36 +389,51 @@
         /* Book Grid */
         .book-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+            gap: 20px;
+            padding-bottom: 40px;
         }
         
         .book-card { 
-            background: #faf8f3; 
-            border-radius: 12px; 
+            background: rgba(45, 55, 72, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 16px; 
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            border: 1px solid rgba(212, 207, 196, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .book-card:hover { 
-            transform: translateY(-12px) scale(1.02); 
-            box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+            transform: translateY(-8px); 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255, 153, 0, 0.3);
+            border-color: rgba(255, 153, 0, 0.5);
         }
         
         .book-cover {
             width: 100%;
-            height: 300px;
-            background: linear-gradient(135deg, #232f3e 0%, #37475a 100%);
+            height: 320px;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #718096;
             font-size: 4em;
             position: relative;
             overflow: hidden;
+        }
+        
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+            z-index: 1;
         }
         
         .book-cover img {
@@ -385,26 +487,26 @@
         }
         
         .book-info {
-            padding: 20px;
+            padding: 18px;
+            background: rgba(26, 31, 46, 0.4);
         }
         
         .book-title { 
-            font-size: 1.15em; 
+            font-size: 1.1em; 
             font-weight: 700; 
-            color: #0f0f0f; 
+            color: #f7fafc; 
             margin-bottom: 8px;
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            font-family: "Bookerly", "Georgia", serif;
         }
         
         .book-author { 
-            color: #5a5a5a; 
-            font-size: 0.92em; 
-            margin-bottom: 6px;
+            color: #a0aec0; 
+            font-size: 0.9em; 
+            margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
@@ -413,40 +515,48 @@
         }
         
         .book-chapters {
-            color: #888;
+            color: #718096;
             font-size: 0.85em;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .book-meta {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin-bottom: 15px;
-            font-size: 0.8em;
-            color: #999;
+            margin-bottom: 14px;
+            font-size: 0.78em;
+            color: #718096;
         }
         
         .book-meta-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            padding: 4px 0;
         }
         
         .book-meta-icon {
-            font-size: 0.9em;
+            font-size: 1em;
+            opacity: 0.8;
         }
         
         .book-badge {
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
             font-size: 0.75em;
-            font-weight: 600;
-            background: #ff9900;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%);
             color: white;
-            margin-left: 5px;
+            margin-left: 6px;
+            box-shadow: 0 2px 6px rgba(255, 153, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .book-actions {
@@ -460,51 +570,63 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: #232f3e; 
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
             color: white; 
             text-decoration: none; 
-            padding: 10px 16px; 
-            border-radius: 6px; 
+            padding: 11px 18px; 
+            border-radius: 10px; 
             font-size: 0.9em;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
             cursor: pointer;
+            box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
         }
         
         .btn:hover { 
-            background: #37475a; 
-            transform: scale(1.05);
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-delete {
-            background: #d32f2f;
-            flex: 0.3;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            flex: 0 0 auto;
+            padding: 11px 14px;
+            box-shadow: 0 2px 8px rgba(245, 101, 101, 0.3);
         }
         
         .btn-delete:hover {
-            background: #b71c1c;
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
         }
         
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            background: #faf8f3;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            border: 1px solid rgba(212, 207, 196, 0.3);
+            padding: 80px 20px;
+            background: rgba(45, 55, 72, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 40px 0;
         }
         
         .empty-state-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
+            font-size: 6em;
+            margin-bottom: 24px;
+            opacity: 0.6;
         }
         
         .empty-state-text {
-            color: #5a5a5a;
+            color: #cbd5e0;
             font-size: 1.2em;
-            margin-bottom: 30px;
-            font-family: "Bookerly", "Georgia", serif;
+            margin-bottom: 32px;
+            line-height: 1.6;
         }
         
         /* Upload Modal */
@@ -526,12 +648,14 @@
         }
         
         .modal-content {
-            background: white;
+            background: rgba(45, 55, 72, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 40px;
-            border-radius: 16px;
-            max-width: 500px;
+            border-radius: 20px;
+            max-width: 520px;
             width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
             animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -549,22 +673,22 @@
         .modal-header {
             font-size: 1.8em;
             font-weight: 700;
-            color: #0f0f0f;
-            margin-bottom: 20px;
+            color: #f7fafc;
+            margin-bottom: 24px;
             text-align: center;
-            font-family: "Bookerly", "Georgia", serif;
         }
         
         .upload-area {
-            border: 3px dashed #cbd5e0;
-            border-radius: 12px;
-            padding: 40px;
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 48px;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             position: relative;
             overflow: hidden;
+            background: rgba(26, 31, 46, 0.4);
         }
         
         .upload-area::before {
@@ -582,7 +706,7 @@
         
         .upload-area:hover {
             border-color: #ff9900;
-            background: #fff9f0;
+            background: rgba(255, 153, 0, 0.1);
             transform: scale(1.02);
         }
         
@@ -593,9 +717,9 @@
         
         .upload-area.dragover {
             border-color: #ff9900;
-            background: #fff4e6;
+            background: rgba(255, 153, 0, 0.2);
             transform: scale(1.05);
-            box-shadow: 0 8px 24px rgba(255, 153, 0, 0.3);
+            box-shadow: 0 8px 24px rgba(255, 153, 0, 0.4), inset 0 0 40px rgba(255, 153, 0, 0.1);
         }
         
         .upload-area.dragover .upload-icon {
@@ -613,7 +737,7 @@
         }
         
         .upload-text {
-            color: #7f8c8d;
+            color: #cbd5e0;
             font-size: 1.1em;
         }
         
@@ -639,13 +763,15 @@
         }
         
         .btn-cancel {
-            background: #e8e3d6;
-            color: #0f0f0f;
+            background: rgba(74, 85, 104, 0.6);
+            color: #e2e8f0;
             font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .btn-cancel:hover {
-            background: #d4cfc4;
+            background: rgba(74, 85, 104, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
         }
         
         /* Progress */
@@ -686,16 +812,18 @@
         /* Notifications */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             padding: 16px 24px;
             border-radius: 12px;
             color: white;
             font-weight: 600;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             z-index: 2000;
             display: none;
             animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         @keyframes slideIn {
@@ -724,51 +852,89 @@
         /* Responsive */
         @media (max-width: 768px) {
             body {
-                padding: 15px;
+                padding: 0;
+            }
+            
+            .container {
+                padding: 0 16px;
+            }
+            
+            header {
+                padding: 14px 16px;
+                position: relative;
             }
             
             h1 {
-                font-size: 2em;
-                flex-direction: column;
-                gap: 10px;
+                font-size: 1.3em;
+                gap: 8px;
+            }
+            
+            h1 span:first-child {
+                font-size: 1.2em;
             }
             
             .subtitle {
-                font-size: 1em;
+                display: none;
             }
             
             .action-bar {
-                flex-direction: column;
-                gap: 12px;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 24px;
             }
             
             .search-box {
-                min-width: 100%;
+                width: 100%;
             }
             
             .upload-btn {
                 width: 100%;
                 justify-content: center;
-                padding: 16px 28px;
-                font-size: 1.05em;
+                padding: 14px 24px;
+                font-size: 1em;
             }
             
             .sort-select {
                 width: 100%;
-                padding: 16px 20px;
-                font-size: 1.05em;
+                padding: 14px 16px;
+                font-size: 0.95em;
             }
             
             .view-toggle {
                 width: 100%;
                 justify-content: center;
-                padding: 6px;
+                padding: 5px;
             }
             
             .view-btn {
                 flex: 1;
-                padding: 12px 20px;
+                padding: 12px 16px;
+                font-size: 1.2em;
+            }
+            
+            .stats-bar {
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+            
+            .stat-item {
+                min-width: calc(33.333% - 6px);
+                padding: 10px 12px;
+                flex-direction: column;
+                text-align: center;
+                gap: 4px;
+            }
+            
+            .stat-icon {
+                font-size: 1.4em;
+            }
+            
+            .stat-value {
                 font-size: 1.3em;
+            }
+            
+            .stat-label {
+                font-size: 0.7em;
             }
             
             /* Hardcover view adjustments for mobile */
@@ -803,12 +969,12 @@
             }
             
             .book-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 16px;
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 14px;
             }
             
             .book-cover {
-                height: 220px;
+                height: 240px;
             }
             
             .book-cover .cover-placeholder {
@@ -830,11 +996,19 @@
             }
             
             .book-info {
-                padding: 16px;
+                padding: 14px;
+            }
+            
+            .book-title {
+                font-size: 1em;
+            }
+            
+            .book-author {
+                font-size: 0.85em;
             }
             
             .book-meta {
-                font-size: 0.75em;
+                font-size: 0.72em;
                 gap: 4px;
             }
             
@@ -844,8 +1018,8 @@
             }
             
             .btn {
-                padding: 12px 16px;
-                font-size: 0.95em;
+                padding: 10px 14px;
+                font-size: 0.88em;
             }
             
             .modal-content {
@@ -939,6 +1113,26 @@
             <div class="subtitle">Your personal collection of EPUB books</div>
         </header>
         
+        {% if books %}
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-icon">📚</span>
+                <span class="stat-value">{{ books|length }}</span>
+                <span class="stat-label">Books</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <span class="stat-value">{{ books|selectattr('last_read')|list|length }}</span>
+                <span class="stat-label">Recent</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">📖</span>
+                <span class="stat-value">{{ books|sum(attribute='chapters') }}</span>
+                <span class="stat-label">Chapters</span>
+            </div>
+        </div>
+        {% endif %}
+        
         <div class="action-bar">
             <div class="search-box">
                 <span class="search-icon">🔍</span>
@@ -962,7 +1156,7 @@
             </div>
             <button class="upload-btn" onclick="openUploadModal()">
                 <span>📤</span>
-                <span>Upload EPUB</span>
+                <span>Upload</span>
             </button>
         </div>
         
